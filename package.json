@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "axios": "^1.7.9",
+    "express": "^4.21.2",
+    "openai": "^4.85.3",
+    "python-shell": "^5.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.26.0"
+  },
+  "name": "boot_caminhoneiros",
+  "version": "1.0.0",
+  "description": "Este projeto implementa um chatbot de caminhoneiro integrado ao WhatsApp usando a API da OpenAI. O chatbot simula um caminhoneiro experiente que negocia viagens e interage de forma descontraída.",
+  "main": "enviar_mensagem.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarconeRafael/boot_caminhoneiros.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MarconeRafael/boot_caminhoneiros/issues"
+  },
+  "homepage": "https://github.com/MarconeRafael/boot_caminhoneiros#readme"
+}

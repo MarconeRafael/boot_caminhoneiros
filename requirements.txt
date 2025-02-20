@@ -1,0 +1,8 @@
+openai==0.28
+pywhatkit
+yowsup
+flask
+qrcode-terminal
+selenium 
+pandas
+ffmpeg-python
