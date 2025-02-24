@@ -24,7 +24,7 @@ def chat_with_gpt(prompt, conversation_history, system_message):
     """
     Envia o prompt (junto com o histórico de conversa) para o GPT e retorna a resposta.
     """
-    base_system_message = "Você é um assistente simpático, que conversa de maneira clara e amigável."
+    base_system_message = "Você é um atendente simpático, que conversa de maneira clara e amigável com caminhoneiros afim de contratar o serviço de fretes deles."
     full_system_message = (base_system_message + " " + system_message) if system_message else base_system_message
 
     # Adiciona a mensagem do usuário ao histórico
@@ -107,6 +107,8 @@ def fluxo(historico_conversa):
 
     # 1. Perguntar o tamanho do caminhão
     system_msg = perguntar_tamanho_caminhao()
+    system_msg += "Respostas:" + " " + str(volume_frete) + " " + str(preco_frete) + " " + str(destino_frete)
+
     tamanho_caminhao = chat_with_gpt("Qual o tamanho do seu caminhão?", historico_conversa, system_msg)
 
     # 2. Verificar se o frete cabe no caminhão
