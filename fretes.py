@@ -15,18 +15,22 @@ def carregar_fretes(caminho_arquivo="data/xls/fretes.xlsx"):
         # Converte para float; se não for possível, vira NaN
         fretes_df['Preço'] = pd.to_numeric(fretes_df['Preço'], errors='coerce')
         
-        # Criando um dicionário Destino → Preço
+        # Criando um dicionário com chave (origem, destino) → Preço
         fretes_dict = {}
         for _, row in fretes_df.iterrows():
+            origem = row['Origem']
             destino = row['Destino']
             preco = row['Preço']
             if pd.isna(preco):
-                fretes_dict[destino] = "Preço não especificado"
+                fretes_dict[(origem, destino)] = "Preço não especificado"
             else:
-                fretes_dict[destino] = f"R${preco:.2f}"
+                fretes_dict[(origem, destino)] = f"R${preco:.2f}"
         
-        # Lista formatada para visualização
-        lista_fretes_str = "\n".join(f"{destino}: {preco}" for destino, preco in fretes_dict.items())
+        # Lista formatada para visualização (incluindo origem e destino)
+        lista_fretes_str = "\n".join(
+            f"{origem} para {destino} por: {preco}" 
+            for (origem, destino), preco in fretes_dict.items()
+        )
 
         return fretes_df, fretes_dict, lista_fretes_str
 
