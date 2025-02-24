@@ -1,73 +1,46 @@
+// whatsapp_bot.js
+
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const express = require('express');
-const { exec } = require('child_process');
-const app = express();
-app.use(express.json());
+const { spawn } = require('child_process');
 
+// Inicializa o cliente do WhatsApp
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth() // Mantém a sessão salva localmente
 });
 
-// Definindo a variável numero_caminhoneiro
-let numero_caminhoneiro = "";  // Aqui você armazenará o número do caminhoneiro
-
-client.on('qr', qr => {
-    console.log("Escaneie este QR Code para conectar o bot ao WhatsApp:");
+// Gerar e exibir o QR Code para autenticação
+client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
+    console.log("QR Code gerado, escaneie com seu WhatsApp.");
 });
 
+// Quando o cliente estiver pronto
 client.on('ready', () => {
-    console.log('Bot está pronto!');
+    console.log('WhatsApp Bot está pronto!');
 });
 
-client.on('message', async msg => {
-    console.log(`Mensagem recebida: ${msg.body}`);
-    
-    try {
-        // Garantir que a mensagem está corretamente escapada e enviada
-        const safeMessage = msg.body.replace(/(["\\])/g, '\\$1'); // Escape de aspas e barras
-        exec(`python main.py "${safeMessage}"`, (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Erro ao executar o script Python: ${error.message}`);
-                msg.reply("Desculpe, ocorreu um erro ao processar sua mensagem.");
-                return;
-            }
-            if (stderr) {
-                console.error(`stderr: ${stderr}`);
-                msg.reply("Desculpe, ocorreu um erro ao processar sua mensagem.");
-                return;
-            }
+// Quando uma nova mensagem chegar
+client.on('message', msg => {
+    console.log("Mensagem recebida:", msg.body);
 
-            const response = stdout.trim();
-            console.log("Resposta do script Python:", response);
+    // Chama o script Python (main.py) passando a mensagem como argumento
+    const pythonProcess = spawn('python', ['main.py', msg.body]);
 
-            if (response) {
-                msg.reply(response);
+    // Captura a resposta do stdout do Python
+    pythonProcess.stdout.on('data', (data) => {
+        const resposta = data.toString().trim();
+        console.log("Resposta do Python:", resposta);
 
-                // Aqui você precisa extrair o número do caminhoneiro da resposta
-                // Exemplo de regex simples para pegar o número: "Negócio fechado! Caminhoneiro: +55XXXXXXXX"
-                const match = response.match(/\+55\d{9}/);
-                if (match) {
-                    numero_caminhoneiro = match[0];  // Armazenando o número do caminhoneiro
-                    console.log("Número do caminhoneiro:", numero_caminhoneiro);
+        // Envia a resposta de volta para o remetente no WhatsApp
+        msg.reply(resposta);
+    });
 
-                    // Agora envie a mensagem para o número do caminhoneiro
-                    const freteAceito = "Detalhes do frete aceito: [informações do frete]";
-                    client.sendMessage(numero_caminhoneiro, `Negócio fechado! Detalhes: ${freteAceito}`);
-                }
-            } else {
-                msg.reply("Desculpe, não consegui processar a sua solicitação.");
-            }
-        });
-    } catch (error) {
-        console.error("Erro ao comunicar com o backend:", error.message);
-        msg.reply("Desculpe, ocorreu um erro ao processar sua mensagem.");
-    }
+    // Captura erros (caso ocorram)
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`Erro no Python: ${data}`);
+    });
 });
 
+// Inicializa o cliente do WhatsApp
 client.initialize();
-
-app.listen(3000, () => {
-    console.log('Servidor do WhatsApp rodando na porta 3000');
-});

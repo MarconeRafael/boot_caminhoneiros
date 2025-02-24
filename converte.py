@@ -3,7 +3,7 @@ import pandas as pd
 
 # Caminho do arquivo de entrada (Excel) e do arquivo de saída (Excel)
 xls_dir = 'data/xls'
-xls_file_path = os.path.join(xls_dir, 'fretes.xls')
+xls_file_path = os.path.join(xls_dir, 'Fretes 21-02-2025 13_50.xls')
 xlsx_file_path = os.path.join(xls_dir, 'fretes.xlsx')
 
 # Verifica se o arquivo .xls existe

@@ -29,15 +29,3 @@ def transcrever_audio(audio_ogg, message):
     message.reply(f"Transcrição: {transcricao_texto}")
     return transcricao_texto
 
-# Função para receber a mensagem do usuário
-def receber_mensagem(message):
-    """Captura o prompt ou transcreve o áudio, se necessário."""
-    if sys.argv[1].endswith((".wav", ".ogg")):
-        # Se for um arquivo de áudio, transcreve o áudio
-        prompt = transcrever_audio(sys.argv[1], message)
-    else:
-        # Caso contrário, trata como um texto diretamente
-        prompt = sys.argv[1]
-    
-    # Inicia a conversa com o caminhoneiro ou qualquer outro processamento desejado
-    return prompt

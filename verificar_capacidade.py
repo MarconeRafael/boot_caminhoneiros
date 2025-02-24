@@ -1,4 +1,4 @@
-def verificar_capacidade(volume_frete, volume_caminhao, message):
+def verificar_capacidade(volume_frete, volume_caminhao):
     """
     Verifica se o volume do frete cabe no volume disponível do caminhão e envia uma resposta.
     """
@@ -10,8 +10,7 @@ def verificar_capacidade(volume_frete, volume_caminhao, message):
     else:
         resposta = "Erro: os volumes fornecidos não são numéricos."
     
-    # Envia a resposta ao usuário usando message.reply()
-    message.reply(resposta)
+
     
     return resposta
 
