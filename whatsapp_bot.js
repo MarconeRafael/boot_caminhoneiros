@@ -1,12 +1,31 @@
-// whatsapp_bot.js
-
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const { spawn } = require('child_process');
+const fs = require('fs');
+
+// Caminho do arquivo JSON
+const caminhoJson = 'mensagens.json';
+
+// Função para salvar mensagens no JSON
+const salvarMensagem = (numero_remetente, mensagem) => {
+    let mensagens = [];
+
+    // Lê o arquivo JSON se já existir
+    if (fs.existsSync(caminhoJson)) {
+        const dados = fs.readFileSync(caminhoJson);
+        mensagens = JSON.parse(dados);
+    }
+
+    // Adiciona a nova mensagem
+    mensagens.push({ numero_remetente, mensagem, timestamp: new Date().toISOString() });
+
+    // Salva no arquivo
+    fs.writeFileSync(caminhoJson, JSON.stringify(mensagens, null, 4));
+};
 
 // Inicializa o cliente do WhatsApp
 const client = new Client({
-    authStrategy: new LocalAuth() // Mantém a sessão salva localmente
+    authStrategy: new LocalAuth()
 });
 
 // Gerar e exibir o QR Code para autenticação
@@ -21,25 +40,39 @@ client.on('ready', () => {
 });
 
 // Quando uma nova mensagem chegar
-client.on('message', msg => {
-    console.log("Mensagem recebida:", msg.body);
+client.on('message', async (msg) => {
+    try {
+        console.log(`Mensagem recebida de ${msg.from}:`, msg.body);
 
-    // Chama o script Python (main.py) passando a mensagem como argumento
-    const pythonProcess = spawn('python', ['main.py', msg.body]);
+        // Obtém o número do remetente
+        const numero_remetente = msg.from;
 
-    // Captura a resposta do stdout do Python
-    pythonProcess.stdout.on('data', (data) => {
-        const resposta = data.toString().trim();
-        console.log("Resposta do Python:", resposta);
+        // Salva a mensagem no JSON
+        salvarMensagem(numero_remetente, msg.body);
 
-        // Envia a resposta de volta para o remetente no WhatsApp
-        msg.reply(resposta);
-    });
+        // Chama o script Python passando o número do remetente
+        const pythonProcess = spawn(process.platform === 'win32' ? 'python' : 'python3', ['teste.py', msg.body, numero_remetente]);
 
-    // Captura erros (caso ocorram)
-    pythonProcess.stderr.on('data', (data) => {
-        console.error(`Erro no Python: ${data}`);
-    });
+        // Captura a resposta do stdout do Python
+        pythonProcess.stdout.on('data', (data) => {
+            const resposta = data.toString().trim();
+            console.log("Resposta do Python:", resposta);
+            msg.reply(resposta);
+        });
+
+        // Captura erros do processo Python
+        pythonProcess.stderr.on('data', (data) => {
+            console.error(`Erro no Python: ${data}`);
+        });
+
+        // Captura se o processo for encerrado inesperadamente
+        pythonProcess.on('close', (code) => {
+            console.log(`Processo Python encerrado com código ${code}`);
+        });
+
+    } catch (error) {
+        console.error("Erro ao processar mensagem:", error);
+    }
 });
 
 // Inicializa o cliente do WhatsApp
